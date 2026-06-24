@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  COUNTY_LEAD
+  VOLUNTEER
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String?
+  email     String   @unique
+  role      UserRole @default(VOLUNTEER)
+
+  countyId  String?
+  county    County? @relation(fields: [countyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model County {
+  id     String @id @default(uuid())
+  name   String @unique
+
+  users  User[]
+  events Event[]
+}
+
+model Event {
+  id          String @id @default(uuid())
+  title       String
+  description String?
+
+  countyId    String
+  county      County @relation(fields: [countyId], references: [id])
+
+  startsAt    DateTime
+  endsAt      DateTime?
+
+  createdAt   DateTime @default(now())
+}
